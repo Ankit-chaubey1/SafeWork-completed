@@ -1,0 +1,494 @@
+{
+  "info": {
+    "name": "SafeWork – Occupational Safety API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Complete API collection for SafeWork microservices. All protected requests use the {{token}} variable set automatically on login."
+  },
+  "variable": [
+    { "key": "gateway", "value": "http://localhost:8091", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. User Service – Auth",
+      "item": [
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/users/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Admin User\",\n  \"userEmail\": \"admin@safework.com\",\n  \"userContact\": \"9876543210\",\n  \"userStatus\": \"ACTIVE\",\n  \"password\": \"admin123\",\n  \"userRole\": \"ADMIN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Compliance Officer",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/users/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Compliance Officer\",\n  \"userEmail\": \"compliance@safework.com\",\n  \"userContact\": \"9876543211\",\n  \"userStatus\": \"ACTIVE\",\n  \"password\": \"comp123\",\n  \"userRole\": \"COMPLIANCE_OFFICER\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Safety Officer",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/users/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Safety Officer\",\n  \"userEmail\": \"safety@safework.com\",\n  \"userContact\": \"9876543212\",\n  \"userStatus\": \"ACTIVE\",\n  \"password\": \"safety123\",\n  \"userRole\": \"SAFETY_OFFICER\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Hazard Officer",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/users/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Hazard Officer\",\n  \"userEmail\": \"hazard@safework.com\",\n  \"userContact\": \"9876543213\",\n  \"userStatus\": \"ACTIVE\",\n  \"password\": \"hazard123\",\n  \"userRole\": \"HAZARD_OFFICER\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login as Admin → sets {{token}}",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var json = pm.response.json();",
+                "if (json.token) { pm.collectionVariables.set('token', json.token); }",
+                "pm.test('Login successful', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/users/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@safework.com\",\n  \"password\": \"admin123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login as Employee → sets {{token}}",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var json = pm.response.json();",
+                "if (json.token) { pm.collectionVariables.set('token', json.token); }",
+                "pm.test('Login successful', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/users/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@safework.com\",\n  \"password\": \"emp123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login as Compliance Officer → sets {{token}}",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var json = pm.response.json();",
+                "if (json.token) { pm.collectionVariables.set('token', json.token); }",
+                "pm.test('Login successful', () => pm.response.to.have.status(200));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/users/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"compliance@safework.com\",\n  \"password\": \"comp123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Employee Service",
+      "item": [
+        {
+          "name": "Register Employee (public)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{gateway}}/employees/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@safework.com\",\n  \"password\": \"emp123\",\n  \"employeeName\": \"John Doe\",\n  \"employeeDOB\": \"1995-06-15\",\n  \"employeeGender\": \"Male\",\n  \"employeeAddress\": \"123 Main Street, Chennai\",\n  \"employeeContact\": \"9876543200\",\n  \"employeeDepartmentName\": \"Operations\",\n  \"employeeStatus\": \"ACTIVE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Employees (ADMIN only)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/employees/getall"
+          }
+        },
+        {
+          "name": "Get Employee by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/employees/1"
+          }
+        },
+        {
+          "name": "Get Employee Hazards",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/employees/1/hazards"
+          }
+        },
+        {
+          "name": "Get Employee Trainings",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/employees/1/trainings"
+          }
+        },
+        {
+          "name": "Get Employee Document",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/employees/1/document"
+          }
+        },
+        {
+          "name": "Report Hazard (EMPLOYEE only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/employees/hazard/report",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hazardType\": \"Chemical Spill\",\n  \"hazardDescription\": \"Chemical spill in lab section B\",\n  \"hazardLocation\": \"Lab Section B\",\n  \"hazardDate\": \"2026-04-11\",\n  \"employeeId\": 1\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Hazard & Incident Service",
+      "item": [
+        {
+          "name": "Post Hazard for Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/hazard/postHazard/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hazardType\": \"Electrical Fault\",\n  \"hazardDescription\": \"Exposed wiring near workstation 4\",\n  \"hazardLocation\": \"Floor 2, Block A\",\n  \"hazardDate\": \"2026-04-11\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Hazards (HAZARD_OFFICER/ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/hazard/getAllHazard"
+          }
+        },
+        {
+          "name": "Get Hazard by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/hazard/getById/1"
+          }
+        },
+        {
+          "name": "Get Hazards by Employee",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/hazard/employee/1"
+          }
+        },
+        {
+          "name": "Get Hazards by Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/hazard/status/PENDING"
+          }
+        },
+        {
+          "name": "Hazard Summary",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/hazard/summary"
+          }
+        },
+        {
+          "name": "Get All Incidents",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/incidents"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Compliance & Audit Service",
+      "item": [
+        {
+          "name": "Create Audit (COMPLIANCE_OFFICER/ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/audit/createAudit",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"auditTitle\": \"Q1 Safety Audit 2026\",\n  \"auditDescription\": \"Quarterly workplace safety review\",\n  \"auditScope\": \"DEPARTMENT\",\n  \"auditStatus\": \"PENDING\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Audits",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/audit/getAll"
+          }
+        },
+        {
+          "name": "Get Audit by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/audit/getAuditById/1"
+          }
+        },
+        {
+          "name": "Get Audits by Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/audit/getAuditByStatus/PENDING"
+          }
+        },
+        {
+          "name": "Get Audits by Scope",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/audit/getAuditByScope/DEPARTMENT"
+          }
+        },
+        {
+          "name": "Create Compliance Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/complianceRecord/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"complianceTitle\": \"Fire Safety Check\",\n  \"entityType\": \"DEPARTMENT\",\n  \"complianceResult\": \"PASS\",\n  \"auditId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Compliance Records",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/complianceRecord/getAll"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Inspection Service",
+      "item": [
+        {
+          "name": "Create Inspection (SAFETY_OFFICER/ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/inspections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inspectionTitle\": \"Monthly Fire Drill Check\",\n  \"inspectionDate\": \"2026-04-11\",\n  \"inspectionLocation\": \"Building A\",\n  \"inspectorName\": \"Safety Officer\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Inspections",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/inspections"
+          }
+        },
+        {
+          "name": "Get Inspection by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/inspections/1"
+          }
+        },
+        {
+          "name": "Create Compliance Check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/inspections/compliance-checks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"checkTitle\": \"Emergency Exit Accessibility\",\n  \"inspectionId\": 1,\n  \"checkResult\": \"PASS\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Compliance Checks by Inspection",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/inspections/compliance-checks/inspection/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Program & Training Service",
+      "item": [
+        {
+          "name": "Create Program (ADMIN only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/programs/createprogram",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"programName\": \"Fire Safety Awareness\",\n  \"programDescription\": \"Mandatory fire safety training for all staff\",\n  \"programDuration\": 8\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Programs",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/programs/getallprograms"
+          }
+        },
+        {
+          "name": "Create Training (ADMIN only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{gateway}}/trainings/createtraining",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trainingName\": \"Chemical Handling Basics\",\n  \"trainingDate\": \"2026-04-20\",\n  \"programId\": 1,\n  \"employeeId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Trainings",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/trainings/getalltrainings"
+          }
+        },
+        {
+          "name": "Get My Trainings (Employee)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/trainings/mytrainings/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Admin – User Management",
+      "item": [
+        {
+          "name": "Get All Users (ADMIN only)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/users/getAllUsers"
+          }
+        },
+        {
+          "name": "Get User by ID (ADMIN only)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/users/getUserById/1"
+          }
+        },
+        {
+          "name": "Delete User (ADMIN only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{gateway}}/users/delete/1"
+          }
+        }
+      ]
+    }
+  ]
+}

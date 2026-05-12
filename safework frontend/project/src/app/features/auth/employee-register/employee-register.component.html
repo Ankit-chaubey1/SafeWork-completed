@@ -1,0 +1,179 @@
+<div class="register-page">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <svg class="bg-grid" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <defs>
+      <pattern id="rg" width="44" height="44" patternUnits="userSpaceOnUse">
+        <path d="M 44 0 L 0 0 0 44" fill="none" stroke="rgba(26,60,94,0.045)" stroke-width="1" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#rg)" />
+  </svg>
+
+  <div class="register-wrap">
+    <div class="topbar">
+      <a routerLink="/login" class="back-link">
+        <span class="back-arrow">←</span>
+        <span>Back to Login</span>
+      </a>
+      <div class="topbar-brand">
+        <div class="brand-logo"><span>SW</span></div>
+        <span class="brand-name">SafeWork</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="header-left">
+          <div class="header-icon">👤</div>
+          <div>
+            <h2>Employee Registration</h2>
+            <p>Complete the form below to request system access.</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="success()" class="alert alert-success">
+        <span>{{ success() }}</span>
+      </div>
+      <div *ngIf="error()" class="alert alert-danger">
+        <span class="alert-icon">⚠</span>
+        <span>{{ error() }}</span>
+      </div>
+
+      <form #regForm="ngForm" (ngSubmit)="submit(regForm)" class="content-grid" novalidate>
+
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-num">01</div>
+            <div>
+              <h3>Personal Information</h3>
+              <span class="section-sub">Your basic identity details</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="form-label">Full Name</label>
+            <div class="input-wrap">
+              <input class="form-control" [(ngModel)]="form.userName" name="userName"
+                     #nameCtrl="ngModel" required minlength="3" placeholder="John Doe" />
+            </div>
+            <small class="error-msg" *ngIf="nameCtrl.invalid && nameCtrl.touched">Required (min 3 chars).</small>
+          </div>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label class="form-label">Date of Birth</label>
+              <div class="input-wrap">
+                <input type="date" 
+                       class="form-control" 
+                       [(ngModel)]="form.employeeDOB"
+                       name="employeeDOB" 
+                       #dobCtrl="ngModel" 
+                       required 
+                       [max]="maxAllowedDate" />
+              </div>
+              <small class="error-msg" *ngIf="dobCtrl.invalid && dobCtrl.touched">Required.</small>
+              <small class="error-msg" *ngIf="form.employeeDOB && !isAdult && dobCtrl.touched">
+                Must be at least 18 years old.
+              </small>
+            </div>
+            
+            <div class="field-group">
+              <label class="form-label">Gender</label>
+              <div class="input-wrap">
+                <select class="form-control" [(ngModel)]="form.employeeGender"
+                        name="employeeGender" #genderCtrl="ngModel" required>
+                  <option value="" disabled>Select...</option>
+                  <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+                </select>
+              </div>
+              <small class="error-msg" *ngIf="genderCtrl.invalid && genderCtrl.touched">Required.</small>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-wrap">
+              <input type="email" class="form-control" [(ngModel)]="form.userEmail"
+                     name="userEmail" #emailCtrl="ngModel" required email placeholder="john@company.com" />
+            </div>
+            <small class="error-msg" *ngIf="emailCtrl.invalid && emailCtrl.touched">Valid email is required.</small>
+          </div>
+
+          <div class="field-group">
+            <label class="form-label">Contact Phone</label>
+            <div class="input-wrap">
+              <input class="form-control" [(ngModel)]="form.userContact"
+                     name="userContact" #phoneCtrl="ngModel" required pattern="^[0-9]{10}$" placeholder="10-digit number" />
+            </div>
+            <small class="error-msg" *ngIf="phoneCtrl.invalid && phoneCtrl.touched">Enter a 10-digit phone number.</small>
+          </div>
+
+          <div class="field-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrap">
+              <input type="password" class="form-control" [(ngModel)]="form.password"
+                     name="password" #passCtrl="ngModel" required minlength="6" placeholder="Min. 6 characters" />
+            </div>
+            <small class="error-msg" *ngIf="passCtrl.invalid && passCtrl.touched">Password too short (min 6).</small>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-header">
+            <div class="section-num">02</div>
+            <div>
+              <h3>Work Information</h3>
+              <span class="section-sub">Role & Documents</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="form-label">Department</label>
+            <div class="input-wrap">
+              <select class="form-control" [(ngModel)]="form.employeeDepartmentName"
+                      name="employeeDepartmentName" #deptCtrl="ngModel" required>
+                <option value="" disabled>Select Department...</option>
+                <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+              </select>
+            </div>
+            <small class="error-msg" *ngIf="deptCtrl.invalid && deptCtrl.touched">Department required.</small>
+          </div>
+
+          <div class="field-group">
+            <label class="form-label">Document Upload</label>
+            <div class="upload-zone" [class.has-file]="selectedFile" [class.is-invalid]="!selectedFile && regForm.submitted">
+              <input type="file" class="upload-input" (change)="onFileSelected($event)" />
+              <div class="upload-content">
+                <div class="upload-icon">{{ selectedFile ? '✅' : '📁' }}</div>
+                <div class="upload-text">
+                  <strong>{{ selectedFile ? selectedFile.name : 'Click to select file' }}</strong>
+                  <span>PDF, JPG or PNG (Max 10MB)</span>
+                </div>
+              </div>
+            </div>
+            <small class="error-msg" *ngIf="!selectedFile && regForm.submitted">File is required.</small>
+          </div>
+
+          <div class="pending-note">
+            <div>
+              <strong>Initial Status: Pending Approval</strong>
+              <span>You can login only after admin activates your account.</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button type="button" class="btn btn-outline" (click)="router.navigate(['/login'])">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading()">
+            <span *ngIf="loading()" class="spinner"></span>
+            {{ loading() ? 'Submitting...' : 'Submit Registration' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

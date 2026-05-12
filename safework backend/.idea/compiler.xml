@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Annotation profile for safework" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
+        <module name="compliance-audit-service" />
+        <module name="config-service" />
+        <module name="inspection-service" />
+        <module name="program-training-service" />
+        <module name="api-gateway" />
+        <module name="user-service" />
+        <module name="hazard-incident-service" />
+        <module name="notification-service" />
+        <module name="service-registry" />
+        <module name="employee-service" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="api-gateway" options="-parameters" />
+      <module name="compliance-audit-service" options="-parameters" />
+      <module name="config-service" options="-parameters" />
+      <module name="employee-service" options="-parameters" />
+      <module name="hazard-incident-service" options="-parameters" />
+      <module name="inspection-service" options="-parameters" />
+      <module name="notification-service" options="-parameters" />
+      <module name="program-training-service" options="-parameters" />
+      <module name="safework" options="-parameters" />
+      <module name="service-registry" options="-parameters" />
+      <module name="user-service" options="-parameters" />
+    </option>
+  </component>
+</project>

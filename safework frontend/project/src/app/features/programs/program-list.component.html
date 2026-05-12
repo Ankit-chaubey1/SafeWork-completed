@@ -1,0 +1,138 @@
+ <div class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Safety Programs</div>
+          <div class="page-subtitle">Manage workplace safety training programs</div>
+        </div>
+        <button class="btn btn-primary" *ngIf="canAdd()" (click)="openForm()">+ Add Program</button>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="search-bar" style="margin:0;flex:1">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="form-control" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Search programs..." />
+            </div>
+            <select class="form-control" style="width:160px" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+              <option value="">All Status</option>
+              <option>Planned</option>
+              <option>Active</option>
+              <option>Completed</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+          <span class="text-muted text-sm">{{ filtered().length }} programs</span>
+        </div>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="operationError()">{{ operationError() }}</div>
+
+      <div class="programs-grid">
+        <div *ngFor="let p of filtered()" class="program-card card">
+          <div class="program-header">
+            <div>
+              <div class="program-title">{{ p.title }} <small class="text-muted" style="font-weight:400;margin-left:4px">#{{ p.programId }}</small></div>
+              <div class="program-dates text-sm text-muted">{{ p.startDate | date:'MMM d' }} — {{ p.endDate | date:'MMM d, y' }}</div>
+            </div>
+            <span [class]="statusBadge(p.status)">{{ p.status }}</span>
+          </div>
+          <p class="program-desc text-muted">{{ p.description | slice:0:120 }}{{ p.description.length > 120 ? '...' : '' }}</p>
+          <div class="program-progress">
+            <div class="progress-info">
+              <span class="text-sm">{{ getStats(p).completed }} / {{ getStats(p).enrolled }} completed</span>
+              <span class="text-sm fw-600">{{ getStats(p).rate }}%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" [style.width.%]="getStats(p).rate"></div>
+            </div>
+            <div class="text-xs text-muted" style="margin-top:4px">
+              {{ getStats(p).inProgress }} in progress
+            </div>
+          </div>
+          <div class="program-footer">
+            <div class="text-sm text-muted">{{ getStats(p).enrolled }} enrolled</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" (click)="selected.set(p)">Details</button>
+              <button class="btn btn-ghost btn-sm" *ngIf="canAdd()" (click)="editProgram(p)">Edit</button>
+              <button class="btn btn-danger btn-sm" *ngIf="canAdd()" (click)="deleteProgram(p)">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filtered().length === 0" class="empty-state card" style="padding:48px">
+        <p>No programs found</p>
+      </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal-backdrop" *ngIf="showForm()" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editing() ? 'Edit Safety Program' : 'Add Safety Program' }}</h3>
+          <button class="btn btn-ghost btn-sm" (click)="closeForm()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Program Title *</label>
+            <input class="form-control" [(ngModel)]="form.title" placeholder="e.g. Fire Safety & Evacuation Training" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" [(ngModel)]="form.description" rows="3" placeholder="Describe the program objectives..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Start Date *</label>
+              <input type="date" class="form-control" [(ngModel)]="form.startDate" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date *</label>
+              <input type="date" class="form-control" [(ngModel)]="form.endDate" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-control" [(ngModel)]="form.status">
+              <option>Planned</option><option>Active</option><option>Completed</option><option>Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeForm()">Cancel</button>
+          <button class="btn btn-primary" (click)="save()">{{ editing() ? 'Update Program' : 'Save Program' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-backdrop" *ngIf="selected()" (click)="selected.set(null)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ selected()?.title }} <small class="text-muted" style="font-weight:400">#{{ selected()?.programId }}</small></h3>
+          <button class="btn btn-ghost btn-sm" (click)="selected.set(null)">✕</button>
+        </div>
+        <div class="modal-body" *ngIf="selected() as p">
+          <p style="color:var(--text-muted);font-size:14px;line-height:1.6">{{ p.description }}</p>
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">Program ID</span><span>#{{ p.programId }}</span></div>
+            <div class="detail-item"><span class="detail-label">Status</span><span [class]="statusBadge(p.status)">{{ p.status }}</span></div>
+            <div class="detail-item"><span class="detail-label">Start Date</span><span>{{ p.startDate | date:'MMMM d, y' }}</span></div>
+            <div class="detail-item"><span class="detail-label">End Date</span><span>{{ p.endDate | date:'MMMM d, y' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Enrolled</span><span>{{ getStats(p).enrolled }}</span></div>
+            <div class="detail-item"><span class="detail-label">In Progress</span><span>{{ getStats(p).inProgress }}</span></div>
+            <div class="detail-item"><span class="detail-label">Completed</span><span>{{ getStats(p).completed }}</span></div>
+            <div class="detail-item"><span class="detail-label">Completion Rate</span><span class="fw-600">{{ getStats(p).rate }}%</span></div>
+          </div>
+          <div class="progress-bar-bg" style="margin-top:12px">
+            <div class="progress-bar-fill" [style.width.%]="getStats(p).rate"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" *ngIf="selected() && canAdd()" (click)="editProgram(selected()!)">Edit</button>
+          <button class="btn btn-danger" *ngIf="selected() && canAdd()" (click)="deleteProgram(selected()!)">Delete</button>
+          <button class="btn btn-outline" (click)="selected.set(null)">Close</button>
+        </div>
+      </div>
+    </div>

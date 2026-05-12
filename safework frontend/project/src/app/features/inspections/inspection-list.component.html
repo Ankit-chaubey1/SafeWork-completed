@@ -1,0 +1,117 @@
+<div class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Inspections</div>
+          <div class="page-subtitle">Schedule and track workplace safety inspections</div>
+        </div>
+        <button class="btn btn-primary" *ngIf="canAdd()" (click)="openForm()">+ Schedule Inspection</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="search-bar" style="margin:0;flex:1">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="form-control" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Search by location, findings..." />
+            </div>
+            <select class="form-control" style="width:160px" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+              <option value="">All Status</option>
+              <option value="SCHEDULED">Scheduled</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
+          </div>
+          <span class="text-muted text-sm">{{ filtered().length }} records</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Location</th><th>Findings</th><th>Officer ID</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ins of filtered()">
+                <td class="fw-500">{{ ins.inspectionId }}</td>
+                <td class="fw-500">{{ ins.inspectionLocation }}</td>
+                <td style="max-width:220px" class="text-sm text-muted">{{ ins.inspectionFindings ? (ins.inspectionFindings | slice:0:60) + (ins.inspectionFindings.length > 60 ? '...' : '') : '—' }}</td>
+                <td class="text-sm">Emp #{{ ins.officerId }}</td>
+                <td class="text-sm text-muted">{{ ins.inspectionDate | date:'MMM d, y' }}</td>
+                <td><span [class]="statusBadge(ins.inspectionStatus)">{{ formatStatus(ins.inspectionStatus) }}</span></td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn btn-ghost btn-sm" (click)="selected.set(ins)">View</button>
+                    <button *ngIf="canAdd()" class="btn btn-ghost btn-sm" (click)="editInspection(ins)">Edit</button>
+                    <button *ngIf="canAdd()" class="btn btn-ghost btn-sm text-danger" (click)="deleteInspection(ins.inspectionId)">Delete</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filtered().length === 0">
+                <td colspan="7"><div class="empty-state"><p>No inspections found</p></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal-backdrop" *ngIf="showForm()" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Schedule Inspection</h3>
+          <button class="btn btn-ghost btn-sm" (click)="closeForm()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Location *</label>
+              <input class="form-control" [(ngModel)]="form.inspectionLocation" placeholder="Building/Area" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-control" [(ngModel)]="form.inspectionStatus">
+                <option value="SCHEDULED">Scheduled</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input type="date" class="form-control" [(ngModel)]="form.inspectionDate" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Findings / Notes</label>
+            <textarea class="form-control" [(ngModel)]="form.inspectionFindings" rows="3" placeholder="Document inspection findings..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeForm()">Cancel</button>
+          <button class="btn btn-primary" (click)="save()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-backdrop" *ngIf="selected()" (click)="selected.set(null)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Inspection Detail</h3>
+          <button class="btn btn-ghost btn-sm" (click)="selected.set(null)">✕</button>
+        </div>
+        <div class="modal-body" *ngIf="selected() as ins">
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">ID</span><span>{{ ins.inspectionId }}</span></div>
+            <div class="detail-item"><span class="detail-label">Status</span><span [class]="statusBadge(ins.inspectionStatus)">{{ formatStatus(ins.inspectionStatus) }}</span></div>
+            <div class="detail-item"><span class="detail-label">Location</span><span>{{ ins.inspectionLocation }}</span></div>
+            <div class="detail-item"><span class="detail-label">Officer ID</span><span>Emp #{{ ins.officerId }}</span></div>
+            <div class="detail-item"><span class="detail-label">Date</span><span>{{ ins.inspectionDate | date:'MMMM d, y' }}</span></div>
+            <div class="detail-item full"><span class="detail-label">Findings</span><span>{{ ins.inspectionFindings || 'No findings recorded yet.' }}</span></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="selected.set(null)">Close</button>
+        </div>
+      </div>
+    </div>

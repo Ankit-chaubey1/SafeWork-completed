@@ -1,0 +1,401 @@
+<div class="page">  <div class="page-header">
+    <div>
+      <div class="page-title">Welcome back, {{ firstName() }}</div>
+      <div class="page-subtitle">{{ user()?.role }} · {{ today | date:'EEEE, MMMM d, y' }}</div>
+    </div>
+  </div>
+
+  <!-- Employee Dashboard -->
+  <ng-container *ngIf="role() === 'Employee'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2">⚠</div>
+        <div class="stat-value">{{ myHazards().length }}</div>
+        <div class="stat-label">My Hazard Reports</div>
+        <div class="stat-delta">{{ openHazards() }} open</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe">🎓</div>
+        <div class="stat-value">{{ myTrainings().length }}</div>
+        <div class="stat-label">My Trainings</div>
+        <div class="stat-delta">{{ completedTrainings() }} completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7">🔔</div>
+        <div class="stat-value">{{ myUnread() }}</div>
+        <div class="stat-label">Unread Alerts</div>
+        <div class="stat-delta">notifications pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5">✓</div>
+        <div class="stat-value">{{ trainingRate() }}%</div>
+        <div class="stat-label">Training Completion</div>
+        <div class="stat-delta">your progress</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>My Recent Hazard Reports</h3>
+          <a routerLink="/hazards" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let h of empHazards().slice(0,4)" class="list-row">
+            <div>
+              <div class="fw-500">{{ h.hazardDescription | slice:0:50 }}...</div>
+              <div class="text-sm text-muted">{{ h.hazardLocation }} · {{ h.hazardDate | date:'MMM d' }}</div>
+            </div>
+            <span [class]="statusBadge(h.hazardStatus)">{{ h.hazardStatus }}</span>
+          </div>
+          <div *ngIf="empHazards().length === 0" class="empty-state">
+            <p>No hazard reports yet</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>My Training Status</h3>
+          <a routerLink="/trainings" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let t of empTrainingsView().slice(0,4)" class="list-row">
+            <div>
+              <div class="fw-500">{{ t.programTitle }}</div>
+              <div class="text-sm text-muted">
+                {{ t.trainingCompletionDate ? 'Completed: ' + (t.trainingCompletionDate | date:'MMM d') : 'In progress' }}
+              </div>
+            </div>
+            <span [class]="trainingBadge(t.trainingStatus)">{{ getTrainingStatusLabel(t.trainingStatus) }}</span>
+          </div>
+          <div *ngIf="empTrainingsView().length === 0" class="empty-state">
+            <p>No trainings enrolled</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Safety Officer Dashboard -->
+  <ng-container *ngIf="role() === 'Safety Officer' || role() === 'Hazard Officer'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2">🔔</div>
+        <div class="stat-value">{{ openIncidents() }}</div>
+        <div class="stat-label">Open Incidents</div>
+        <div class="stat-delta">requiring action</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7">⚠</div>
+        <div class="stat-value">{{ criticalHazards() }}</div>
+        <div class="stat-label">Critical Hazards</div>
+        <div class="stat-delta">{{ highHazards() }} high severity</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe">🔍</div>
+        <div class="stat-value">{{ scheduledInspections() }}</div>
+        <div class="stat-label">Scheduled Inspections</div>
+        <div class="stat-delta">upcoming</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5">✓</div>
+        <div class="stat-value">{{ completedInspections() }}</div>
+        <div class="stat-label">Completed Inspections</div>
+        <div class="stat-delta">this period</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Hazard Reports</h3>
+          <a routerLink="/hazards" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let h of soHazards().slice(0,5)" class="list-row">
+            <div>
+              <div class="fw-500">{{ h.hazardDescription | slice:0:48 }}{{ (h.hazardDescription?.length ?? 0) > 48 ? '...' : '' }}</div>
+              <div class="text-sm text-muted">{{ h.hazardLocation }} · Emp #{{ h.employeeId }}</div>
+            </div>
+            <span [class]="statusBadge(h.hazardStatus)">{{ h.hazardStatus }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Active Incidents</h3>
+          <a routerLink="/incidents" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let i of soIncidents().slice(0,5)" class="list-row">
+            <div>
+              <div class="fw-500">{{ i.hazardDescription | slice:0:48 }}{{ (i.hazardDescription?.length ?? 0) > 48 ? '...' : '' }}</div>
+              <div class="text-sm text-muted">{{ i.incidentDate | date:'MMM d' }}</div>
+            </div>
+            <span [class]="incidentBadge('Closed')">Closed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Manager Dashboard -->
+  <ng-container *ngIf="role() === 'Manager'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe">📋</div>
+        <div class="stat-value">{{ activePrograms() }}</div>
+        <div class="stat-label">Active Programs</div>
+        <div class="stat-delta">{{ plannedPrograms() }} planned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5">🎓</div>
+        <div class="stat-value">{{ overallTrainingRate() }}%</div>
+        <div class="stat-label">Training Completion</div>
+        <div class="stat-delta">across all programs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2">⚠</div>
+        <div class="stat-value">{{ openHazardsTotal() }}</div>
+        <div class="stat-label">Open Hazards</div>
+        <div class="stat-delta">{{ criticalHazards() }} critical</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7">👤</div>
+        <div class="stat-value">{{ totalEmployees() }}</div>
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-delta">{{ activeEmployees() }} active</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>Safety Programs</h3>
+          <a routerLink="/programs" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let p of allPrograms().slice(0,4)" class="list-row">
+            <div>
+              <div class="fw-500">{{ p.title }}</div>
+              <div class="text-sm text-muted">{{ p.enrolledCount }} enrolled · {{ p.completedCount }} completed</div>
+            </div>
+            <span [class]="programBadge(p.status)">{{ p.status }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Reports</h3>
+          <a routerLink="/reports" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let r of allReports().slice(0,4)" class="list-row">
+            <div>
+              <div class="fw-500">{{ r.title }}</div>
+              <div class="text-sm text-muted">{{ r.generatedDate | date:'MMM d, y' }}</div>
+            </div>
+            <span class="badge badge-info">{{ r.scope }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Administrator Dashboard -->
+  <ng-container *ngIf="role() === 'Administrator'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe">👥</div>
+        <div class="stat-value">{{ allUsers().length }}</div>
+        <div class="stat-label">Total Users</div>
+        <div class="stat-delta">{{ activeUsersCount() }} active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5">👤</div>
+        <div class="stat-value">{{ totalEmployees() }}</div>
+        <div class="stat-label">Employees</div>
+        <div class="stat-delta">{{ activeEmployees() }} active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2">⚠</div>
+        <div class="stat-value">{{ openHazardsTotal() }}</div>
+        <div class="stat-label">Open Hazards</div>
+        <div class="stat-delta">system-wide</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7">📝</div>
+        <div class="stat-value">{{ auditLogs().length }}</div>
+        <div class="stat-label">Audit Log Entries</div>
+        <div class="stat-delta">all time</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Audit Log</h3>
+          <a routerLink="/audit-log" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let log of auditLogs().slice(0,5)" class="list-row">
+            <div>
+              <div class="fw-500">{{ log.resource | slice:0:52 }}</div>
+              <div class="text-sm text-muted">{{ log.userName }} · {{ log.timestamp | date:'MMM d, HH:mm' }}</div>
+            </div>
+            <span class="badge badge-neutral">{{ log.action }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>User Breakdown</h3>
+          <a routerLink="/users" class="btn btn-sm btn-outline">Manage</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let g of userGroups()" class="list-row">
+            <div class="fw-500">{{ g.role }}</div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="mini-bar-wrap">
+                <div class="mini-bar" [style.width.%]="g.pct"></div>
+              </div>
+              <span class="fw-600">{{ g.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Compliance Officer Dashboard -->
+  <ng-container *ngIf="role() === 'Compliance Officer'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5">✓</div>
+        <div class="stat-value">{{ compliantCount() }}</div>
+        <div class="stat-label">Compliant Records</div>
+        <div class="stat-delta">{{ complianceRate() }}% rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2">✗</div>
+        <div class="stat-value">{{ nonCompliantCount() }}</div>
+        <div class="stat-label">Non-Compliant</div>
+        <div class="stat-delta">requiring remediation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7">📊</div>
+        <div class="stat-value">{{ activeAudits() }}</div>
+        <div class="stat-label">Active Audits</div>
+        <div class="stat-delta">in progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe">📁</div>
+        <div class="stat-value">{{ allCompliance().length }}</div>
+        <div class="stat-label">Total Records</div>
+        <div class="stat-delta">compliance records</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>Compliance Records</h3>
+          <a routerLink="/compliance" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let c of allCompliance().slice(0,5)" class="list-row">
+            <div>
+              <div class="fw-500">{{ c.entityDescription }}</div>
+              <div class="text-sm text-muted">{{ c.type }} · {{ c.date | date:'MMM d' }}</div>
+            </div>
+            <span [class]="complianceBadge(c.result)">{{ c.result }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Audits</h3>
+          <a routerLink="/audits" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let a of allAudits().slice(0,4)" class="list-row">
+            <div>
+              <div class="fw-500">{{ a.scope | slice:0:50 }}</div>
+              <div class="text-sm text-muted">{{ a.officerName }} · {{ a.date | date:'MMM d' }}</div>
+            </div>
+            <span [class]="auditBadge(a.status)">{{ a.status }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Government Auditor Dashboard -->
+  <ng-container *ngIf="role() === 'Government Auditor'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5">📊</div>
+        <div class="stat-value">{{ complianceRate() }}%</div>
+        <div class="stat-label">Overall Compliance Rate</div>
+        <div class="stat-delta">across all categories</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2">⚠</div>
+        <div class="stat-value">{{ openHazardsTotal() }}</div>
+        <div class="stat-label">Open Hazards</div>
+        <div class="stat-delta">system-wide</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe">🔍</div>
+        <div class="stat-value">{{ completedInspections() }}</div>
+        <div class="stat-label">Completed Inspections</div>
+        <div class="stat-delta">this period</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7">📈</div>
+        <div class="stat-value">{{ allReports().length }}</div>
+        <div class="stat-label">Available Reports</div>
+        <div class="stat-delta">for review</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>Compliance Overview</h3>
+          <a routerLink="/compliance" class="btn btn-sm btn-outline">Details</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let c of allCompliance().slice(0,5)" class="list-row">
+            <div>
+              <div class="fw-500">{{ c.entityDescription }}</div>
+              <div class="text-sm text-muted">{{ c.type }} · {{ c.date | date:'MMM d' }}</div>
+            </div>
+            <span [class]="complianceBadge(c.result)">{{ c.result }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Reports</h3>
+          <a routerLink="/reports" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div *ngFor="let r of allReports()" class="list-row">
+            <div>
+              <div class="fw-500">{{ r.title }}</div>
+              <div class="text-sm text-muted">{{ r.generatedDate | date:'MMM d, y' }}</div>
+            </div>
+            <span class="badge badge-info">{{ r.scope }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

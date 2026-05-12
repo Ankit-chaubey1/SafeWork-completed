@@ -1,0 +1,159 @@
+<div class="page"><div class="page-header">
+    <div>
+      <div class="page-title">Incidents</div>
+      <div class="page-subtitle">Track and manage hazard incidents</div>
+    </div>
+    <button *ngIf="canManage()" class="btn btn-primary" (click)="openForm()">+ Create Incident</button>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="search-bar" style="margin:0;flex:1">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input
+            class="form-control"
+            [ngModel]="search()"
+            (ngModelChange)="search.set($event)"
+            placeholder="Search incidents..."
+          />
+        </div>
+      </div>
+      <span class="text-muted text-sm">{{ filtered().length }} records</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Hazard</th>
+            <th>Actions Taken</th>
+            <th>Officer</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let i of filtered()">
+            <td style="max-width:220px">
+              <div class="fw-500">
+                {{ i.hazardDescription | slice:0:50 }}{{ (i.hazardDescription?.length ?? 0) > 50 ? '...' : '' }}
+              </div>
+              <div class="text-sm text-muted">ID: {{ i.incidentId }}</div>
+            </td>
+
+            <td style="max-width:260px" class="text-sm">
+              {{ i.action | slice:0:70 }}{{ (i.action?.length ?? 0) > 70 ? '...' : '' }}
+            </td>
+
+            <td class="text-sm">Emp #{{ i.officerId }}</td>
+            <td class="text-sm text-muted">{{ i.incidentDate | date:'MMM d, y' }}</td>
+
+            <td>
+              <div style="display:flex;gap:4px">
+                <button class="btn btn-ghost btn-sm" (click)="selected.set(i)">View</button>
+                <button *ngIf="canManage()" class="btn btn-outline btn-sm" (click)="editIncident(i)">Edit</button>
+                <button *ngIf="canManage()" class="btn btn-ghost btn-sm text-danger" (click)="deleteIncident(i.incidentId)">Delete</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filtered().length === 0">
+            <td colspan="5">
+              <div class="empty-state">
+                <p>No incidents found</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Form Modal -->
+<div class="modal-backdrop" *ngIf="showForm()" (click)="closeForm()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editingIncidentId ? 'Edit' : 'Create' }} Incident</h3>
+      <button class="btn btn-ghost btn-sm" (click)="closeForm()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group" *ngIf="!editingIncidentId">
+        <label class="form-label">Select Hazard Report *</label>
+        <select class="form-control" [(ngModel)]="form.hazardId">
+          <option [ngValue]="null">-- Select a Hazard --</option>
+          <option *ngFor="let h of availableHazards()" [value]="h.hazardId">
+            ID: {{ h.hazardId }} - {{ h.hazardDescription | slice:0:40 }}... ({{ h.hazardStatus }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Actions Taken *</label>
+        <textarea
+          class="form-control"
+          [(ngModel)]="form.action"
+          rows="4"
+          placeholder="Describe the actions taken to resolve this hazard..."
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="closeForm()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-backdrop" *ngIf="selected()" (click)="selected.set(null)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Incident Detail</h3>
+      <button class="btn btn-ghost btn-sm" (click)="selected.set(null)">✕</button>
+    </div>
+
+    <div class="modal-body" *ngIf="selected() as i">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Incident ID</span>
+          <span>{{ i.incidentId }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Hazard ID</span>
+          <span>{{ i.hazardId }}</span>
+        </div>
+
+        <div class="detail-item full">
+          <span class="detail-label">Hazard Description</span>
+          <span>{{ i.hazardDescription }}</span>
+        </div>
+
+        <div class="detail-item full">
+          <span class="detail-label">Actions Taken</span>
+          <span>{{ i.action }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Officer</span>
+          <span>Emp #{{ i.officerId }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Date</span>
+          <span>{{ i.incidentDate | date:'MMMM d, y' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="selected.set(null)">Close</button>
+    </div>
+  </div>
+</div>
+

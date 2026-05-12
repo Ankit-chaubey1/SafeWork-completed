@@ -1,0 +1,114 @@
+<div class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Training Records</div>
+          <div class="page-subtitle">Employee training enrollment and completion status</div>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="margin-bottom:20px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#d1fae5">🎓</div>
+          <div class="stat-value">{{ completed() }}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#dbeafe">⏳</div>
+          <div class="stat-value">{{ inProgress() }}</div>
+          <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7">📋</div>
+          <div class="stat-value">{{ notStarted() }}</div>
+          <div class="stat-label">Not Started</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fee2e2">✗</div>
+          <div class="stat-value">{{ failed() }}</div>
+          <div class="stat-label">Failed</div>
+        </div>
+      </div>
+
+      <div class="card" *ngIf="canAssignTraining()">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Assign Training</div>
+            <div class="text-sm text-muted">Create training using available programs and employees</div>
+          </div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 16px;">
+          <select class="form-control" [(ngModel)]="form.programId">
+            <option [value]="0">Select Program</option>
+            <option *ngFor="let p of assignablePrograms()" [value]="p.programId">{{ p.programTitle }}</option>
+          </select>
+          <select class="form-control" [(ngModel)]="form.employeeId">
+            <option [value]="0">Select Employee</option>
+            <option *ngFor="let e of assignableEmployees()" [value]="e.employeeId">{{ e.employeeName }}</option>
+          </select>
+          <select class="form-control" [(ngModel)]="form.trainingStatus">
+            <option value="NOT_STARTED">Not Started</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="FAILED">Failed</option>
+            <option value="PLANNED">Planned</option>
+          </select>
+          <input class="form-control" type="date" [(ngModel)]="form.trainingCompletionDate" />
+        </div>
+        <div style="padding: 0 16px 16px;">
+          <button class="btn btn-primary" (click)="assignTraining()">{{ editingTrainingId ? 'Update Training' : 'Assign Training' }}</button>
+        </div>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="operationError()" style="margin: 0 16px 16px;">{{ operationError() }}</div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="search-bar" style="margin:0;flex:1">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="form-control" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Search trainings..." />
+            </div>
+            <select class="form-control" style="width:150px" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+              <option value="">All Status</option>
+              <option value="NOT_STARTED">Not Started</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="FAILED">Failed</option>
+              <option value="PLANNED">Planned</option>
+            </select>
+            <select class="form-control" style="width:180px" [ngModel]="filterProgram()" (ngModelChange)="filterProgram.set($event)">
+              <option value="">All Programs</option>
+              <option *ngFor="let p of assignablePrograms()" [value]="p.programId">{{ p.programTitle }}</option>
+            </select>
+            <select class="form-control" style="width:180px" [ngModel]="filterEmployee()" (ngModelChange)="filterEmployee.set($event)">
+              <option value="">All Employees</option>
+              <option *ngFor="let e of assignableEmployees()" [value]="e.employeeId">{{ e.employeeName }}</option>
+            </select>
+          </div>
+          <span class="text-muted text-sm">{{ filtered().length }} records</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Training ID</th><th>Employee</th><th>Program</th><th>Completion Date</th><th>Status</th><th *ngIf="canAssignTraining()">Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of filtered()">
+                <td>{{ t.id }}</td>
+                <td class="fw-500">{{ t.employeeName }}</td>
+                <td>{{ t.programTitle }}</td>
+                <td class="text-sm text-muted">{{ t.trainingCompletionDate ? (t.trainingCompletionDate | date:'MMM d, y') : '—' }}</td>
+                <td><span [class]="statusBadge(t.trainingStatus)">{{ getStatusLabel(t.trainingStatus) }}</span></td>
+                <td *ngIf="canAssignTraining()" style="display:flex;gap:8px">
+                  <button class="btn btn-ghost btn-sm" (click)="editTraining(t)">Edit</button>
+                  <button class="btn btn-ghost btn-sm text-danger" (click)="deleteTraining(t.id!)">Delete</button>
+                </td>
+              </tr>
+              <tr *ngIf="filtered().length === 0">
+                <td [attr.colspan]="canAssignTraining() ? 5 : 4"><div class="empty-state"><p>No training records found</p></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>

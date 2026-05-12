@@ -1,0 +1,154 @@
+<div class="login-page">
+
+  <!-- LEFT PANEL -->
+  <div class="login-left">
+
+    <svg class="deco-grid" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <defs>
+        <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+          <path d="M 48 0 L 0 0 0 48" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" />
+    </svg>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+
+    <div class="left-content">
+      <div class="login-brand">
+        <div class="brand-logo">
+          <span class="logo-text">SW</span>
+          <div class="logo-shine"></div>
+        </div>
+        <div class="brand-name">SafeWork</div>
+      </div>
+
+      <div class="headline-wrap">
+        <div class="tag-pill">Enterprise Safety Platform</div>
+        <h1 class="login-headline">
+          Workplace Safety,<br />
+          <span class="headline-accent">Simplified.</span>
+        </h1>
+      </div>
+
+      <p class="login-desc">
+        A unified platform for hazard reporting, safety inspections, compliance tracking,
+        and workplace safety program management.
+      </p>
+
+      <div class="divider-line"></div>
+
+      <div class="feature-list">
+        <div class="feature-item" *ngFor="let f of features; let i = index" [style.--i]="i">
+          <div class="feature-icon-wrap">
+            <span class="feature-icon">{{ f.icon }}</span>
+          </div>
+          <span class="feature-text">{{ f.text }}</span>
+        </div>
+      </div>
+
+      <div class="trust-badge">
+        <span class="trust-dot"></span>
+        <span class="trust-dot"></span>
+        <span class="trust-dot"></span>
+        <span class="trust-label">Trusted by 500+ organizations worldwide</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="login-right">
+    <div class="right-bg-pattern"></div>
+
+    <div class="login-card">
+      <div class="card-accent-bar"></div>
+
+      <div class="card-header">
+        <div class="card-logo-mini">SW</div>
+        <div>
+          <h2 class="login-title">Sign in to SafeWork</h2>
+          <p class="login-sub" style="color:red">Sign in with approved account credentials.</p>
+        </div>
+      </div>
+
+      <div *ngIf="error()" class="alert alert-danger" style="margin-bottom:16px">
+        <span class="alert-icon">⚠</span>
+        <span>{{ error() }}</span>
+      </div>
+
+      <form (ngSubmit)="submit()" #loginForm="ngForm">
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label">
+            <span class="label-icon">✉</span>
+            Email Address
+          </label>
+          <div class="input-wrap">
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              required
+              class="form-control"
+              placeholder="your@email.com"
+              autocomplete="username"
+            />
+            <div class="input-focus-bar"></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">
+            <span class="label-icon">🔒</span>
+            Password
+          </label>
+          <div class="input-wrap">
+            <input
+              type="password"
+              name="password"
+              [(ngModel)]="password"
+              required
+              class="form-control"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <div class="input-focus-bar"></div>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          style="width:100%;justify-content:center;padding:11px"
+          [disabled]="loading()"
+        >
+          <span class="btn-inner">
+            <span class="btn-spinner" *ngIf="loading()"></span>
+            <span>{{ loading() ? 'Signing in...' : 'Sign In' }}</span>
+            <span class="btn-arrow" *ngIf="!loading()">→</span>
+          </span>
+          <div class="btn-shimmer"></div>
+        </button>
+      </form>
+
+      <div class="form-footer">
+        <div class="footer-divider">
+          <span class="divider-text">or</span>
+        </div>
+
+        <a routerLink="/employee-register" class="register-link">
+          <span>New employee? Register here</span>
+          <span class="reg-arrow">↗</span>
+        </a>
+      </div>
+
+      <div class="card-footer-badge">
+        <span class="shield-icon">🛡</span>
+        <span>256-bit SSL encrypted · SOC 2 compliant</span>
+      </div>
+    </div>
+  </div>
+</div>

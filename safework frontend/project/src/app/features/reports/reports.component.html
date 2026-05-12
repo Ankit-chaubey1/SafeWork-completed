@@ -1,0 +1,103 @@
+<div class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Reports & Analytics</div>
+          <div class="page-subtitle">System-wide safety performance metrics and insights</div>
+        </div>
+      </div>
+
+      <!-- Key Metrics -->
+      <div class="stats-grid" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fee2e2">⚠</div>
+          <div class="stat-value">{{ totalHazards() }}</div>
+          <div class="stat-label">Total Hazards</div>
+          <div class="stat-delta">{{ openHazards() }} open · {{ resolvedHazards() }} resolved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#dbeafe">🔍</div>
+          <div class="stat-value">{{ totalInspections() }}</div>
+          <div class="stat-label">Inspections</div>
+          <div class="stat-delta">{{ completedInspections() }} completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#d1fae5">📊</div>
+          <div class="stat-value">{{ complianceRate() }}%</div>
+          <div class="stat-label">Compliance Rate</div>
+          <div class="stat-delta">{{ compliantCount() }} of {{ totalCompliance() }} records</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7">🎓</div>
+          <div class="stat-value">{{ trainingRate() }}%</div>
+          <div class="stat-label">Training Completion</div>
+          <div class="stat-delta">{{ completedTrainings() }} of {{ totalTrainings() }} trainings</div>
+        </div>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="grid-2" style="margin-bottom:24px">
+        <div class="card">
+          <div class="card-header"><h3>Hazard Severity Breakdown</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div *ngFor="let item of hazardBySeverity()" class="chart-row">
+                <div class="chart-label">{{ item.label }}</div>
+                <div class="chart-bar-outer">
+                  <div class="chart-bar-inner" [style.width.%]="item.pct" [style.background]="item.color"></div>
+                </div>
+                <div class="chart-val">{{ item.count }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Compliance by Category</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div *ngFor="let item of complianceByType()" class="chart-row">
+                <div class="chart-label">{{ item.label }}</div>
+                <div class="chart-bar-outer">
+                  <div class="chart-bar-inner" [style.width.%]="item.pct" [style.background]="'var(--secondary)'"></div>
+                </div>
+                <div class="chart-val">{{ item.rate }}%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report List -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Generated Reports</h3>
+          <div style="display:flex;gap:8px">
+            <select class="form-control" style="width:150px" [(ngModel)]="filterScope">
+              <option value="">All Scopes</option>
+              <option>Hazard</option><option>Inspection</option><option>Program</option><option>Compliance</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div *ngFor="let r of filteredReports()" class="report-row" (click)="selected = selected === r ? null : r">
+            <div class="report-info">
+              <div class="report-title">{{ r.title }}</div>
+              <div class="text-sm text-muted">Generated {{ r.generatedDate | date:'MMMM d, y' }} by {{ r.generatedBy }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="badge badge-info">{{ r.scope }}</span>
+              <span class="expand-icon">{{ selected === r ? '▲' : '▼' }}</span>
+            </div>
+          </div>
+          <!-- Expanded detail -->
+          <div *ngIf="selected" class="report-detail">
+            <h4 style="margin-bottom:12px">{{ selected.title }} — Metrics</h4>
+            <div class="metrics-grid">
+              <div *ngFor="let m of selected.metrics | keyvalue" class="metric-item">
+                <div class="metric-label">{{ formatKey(m.key) }}</div>
+                <div class="metric-value">{{ m.value }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

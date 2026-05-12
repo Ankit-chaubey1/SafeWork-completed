@@ -1,0 +1,192 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Compliance Checks</div>
+      <div class="page-subtitle">Review inspection compliance outcomes</div>
+    </div>
+    <button class="btn btn-primary" *ngIf="canAdd()" (click)="openForm()">+ Create Check</button>
+  </div>
+
+  <div class="stats-grid" style="margin-bottom:20px">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#d1fae5">✓</div>
+      <div class="stat-value">{{ pass() }}</div>
+      <div class="stat-label">Pass</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef3c7">~</div>
+      <div class="stat-value">{{ partial() }}</div>
+      <div class="stat-label">Partial</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fee2e2">✗</div>
+      <div class="stat-value">{{ fail() }}</div>
+      <div class="stat-label">Fail</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#dbeafe">📋</div>
+      <div class="stat-value">{{ complianceChecks().length }}</div>
+      <div class="stat-label">Total Checks</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="search-bar" style="margin:0;flex:1">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input
+            class="form-control"
+            [ngModel]="search()"
+            (ngModelChange)="search.set($event)"
+            placeholder="Search checks..."
+          />
+        </div>
+
+        <select
+          class="form-control"
+          style="width:140px"
+          [ngModel]="filterResult()"
+          (ngModelChange)="filterResult.set($event)"
+        >
+          <option value="">All Results</option>
+          <option value="PASS">Pass</option>
+          <option value="PARTIAL">Partial</option>
+          <option value="FAIL">Fail</option>
+        </select>
+
+        <select
+          class="form-control"
+          style="width:140px"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+        >
+          <option value="">All Status</option>
+          <option value="OPEN">Open</option>
+          <option value="CLOSED">Closed</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Inspection ID</th>
+            <th>Result</th>
+            <th>Notes</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let c of filtered()">
+            <td class="fw-500">Insp #{{ c.inspectionId }}</td>
+            <td>
+              <span [class]="resultBadge(c.complianceCheckResult)">
+                {{ formatResult(c.complianceCheckResult) }}
+              </span>
+            </td>
+            <td style="max-width:280px" class="text-sm text-muted">
+              {{
+                c.complianceCheckNotes
+                  ? (c.complianceCheckNotes | slice:0:80) + (c.complianceCheckNotes.length > 80 ? '...' : '')
+                  : '—'
+              }}
+            </td>
+            <td class="text-sm text-muted">{{ c.complianceCheckDate | date:'MMM d, y' }}</td>
+            <td>
+              <span [class]="statusBadge(c.complianceCheckStatus)">
+                {{ formatResult(c.complianceCheckStatus) }}
+              </span>
+            </td>
+            <td>
+              <div style="display:flex;gap:4px">
+                <button *ngIf="canAdd()" class="btn btn-ghost btn-sm" (click)="editCheck(c)">Edit</button>
+                <button *ngIf="canDelete()" class="btn btn-ghost btn-sm text-danger" (click)="deleteCheck(c.checkId)">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filtered().length === 0">
+            <td colspan="6">
+              <div class="empty-state">
+                <p>No compliance checks found</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Form Modal -->
+<div class="modal-backdrop" *ngIf="showForm()" (click)="closeForm()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editingCheckId ? 'Edit' : 'Create' }} Compliance Check</h3>
+      <button class="btn btn-ghost btn-sm" (click)="closeForm()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Inspection *</label>
+          <select class="form-control" [(ngModel)]="form.inspectionId" [disabled]="!!editingCheckId">
+            <option [ngValue]="null">Select Inspection</option>
+            <option *ngFor="let ins of inspections()" [ngValue]="ins.inspectionId">
+              #{{ ins.inspectionId }} - {{ ins.inspectionLocation }} ({{ ins.inspectionDate | date:'shortDate' }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Result *</label>
+          <select class="form-control" [(ngModel)]="form.complianceCheckResult">
+            <option value="PASS">Pass</option>
+            <option value="PARTIAL">Partial</option>
+            <option value="FAIL">Fail</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date *</label>
+          <input type="date" class="form-control" [(ngModel)]="form.complianceCheckDate" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status *</label>
+          <select class="form-control" [(ngModel)]="form.complianceCheckStatus">
+            <option value="OPEN">Open</option>
+            <option value="CLOSED">Closed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea
+          class="form-control"
+          [(ngModel)]="form.complianceCheckNotes"
+          rows="3"
+          placeholder="Enter compliance notes..."
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="closeForm()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()">Save</button>
+    </div>
+  </div>
+</div>

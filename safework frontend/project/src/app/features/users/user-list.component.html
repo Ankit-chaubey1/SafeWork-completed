@@ -1,0 +1,114 @@
+<div class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">User Management</div>
+          <div class="page-subtitle">Manage system users and role assignments</div>
+        </div>
+        <button class="btn btn-primary" (click)="openForm()">+ Add User</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="search-bar" style="margin:0;flex:1">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="form-control" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Search by name or email..." />
+            </div>
+            <select class="form-control" style="width:200px" [ngModel]="filterRole()" (ngModelChange)="filterRole.set($event)">
+              <option value="">All Roles</option>
+              <option *ngFor="let r of roles">{{ r }}</option>
+            </select>
+            <select class="form-control" style="width:140px" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+              <option value="">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+            </select>
+          </div>
+          <span class="text-muted text-sm">{{ filtered().length }} users</span>
+        </div>
+        <div class="alert alert-danger" *ngIf="operationError()" style="margin: 0 16px 16px;">{{ operationError() }}</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>User</th><th>Role</th><th>Contact</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of filtered()">
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div class="avatar">{{ initials(u.userName) }}</div>
+                    <div>
+                      <div class="fw-600" style="font-size:13.5px">{{ u.userName }}</div>
+                      <div class="text-sm text-muted">{{ u.userEmail }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span [class]="roleBadge(u.userRole)">{{ u.userRole }}</span></td>
+                <td class="text-sm text-muted">{{ u.userContact }}</td>
+                <td><span [class]="u.userStatus === 'ACTIVE' ? 'badge badge-success' : 'badge badge-danger'">{{ u.userStatus }}</span></td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn btn-ghost btn-sm" (click)="openForm(u)">Edit</button>
+                    <button class="btn btn-ghost btn-sm text-danger" (click)="deleteUser(u.userId)">Delete</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filtered().length === 0">
+                <td colspan="5"><div class="empty-state"><p>No users found</p></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" *ngIf="showForm()" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editing()?.userId ? 'Edit User' : 'Add User' }}</h3>
+          <button class="btn btn-ghost btn-sm" (click)="closeForm()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input class="form-control" [(ngModel)]="form.userName" placeholder="Jane Smith" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email *</label>
+              <input type="email" class="form-control" [(ngModel)]="form.userEmail" placeholder="jane@safework.com" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Role *</label>
+              <select class="form-control" [(ngModel)]="form.userRole">
+                <option *ngFor="let r of roles">{{ r }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact</label>
+              <input class="form-control" [(ngModel)]="form.userContact" placeholder="555-0100" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-control" [(ngModel)]="form.userStatus">
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ editing()?.userId ? 'New Password (optional)' : 'Password *' }}</label>
+              <input type="password" class="form-control" [(ngModel)]="form.password" placeholder="Enter secure password" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeForm()">Cancel</button>
+          <button class="btn btn-primary" (click)="save()">Save User</button>
+        </div>
+      </div>
+    </div>

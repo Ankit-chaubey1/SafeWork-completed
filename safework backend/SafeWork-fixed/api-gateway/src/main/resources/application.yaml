@@ -1,0 +1,155 @@
+server:
+  port: 8099
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+
+        # ── 1. USER SERVICE: Public (no JWT) ────────────────────────────
+        - id: user-service-public
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/login, /users/register
+          filters:
+            - StripPrefix=0
+
+        # ── 2. USER SERVICE: Internal service-to-service (no JWT) ───────
+        - id: user-service-internal
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/internal/**
+          filters:
+            - StripPrefix=0
+
+        # ── 3. USER SERVICE: Protected (Admin only) ──────────────────────
+        - id: user-service-protected
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: ADMIN
+
+        # ── 4. EMPLOYEE SERVICE: Public registration ─────────────────────
+        - id: employee-service-public
+          uri: lb://EMPLOYEE-SERVICE
+          predicates:
+            - Path=/employees/register
+
+
+        # ── 5. EMPLOYEE SERVICE: Protected ───────────────────────────────
+        - id: employee-service-protected
+          uri: lb://EMPLOYEE-SERVICE
+          predicates:
+            - Path=/employees/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: ADMIN,EMPLOYEE,HAZARD_OFFICER,SAFETY_OFFICER,COMPLIANCE_OFFICER
+
+        # ── 6. HAZARD SERVICE ─────────────────────────────────────────────
+        - id: hazard-route
+          uri: lb://HAZARD-INCIDENT-SERVICE
+          predicates:
+            - Path=/hazard/**, /incidents/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: EMPLOYEE,HAZARD_OFFICER,SAFETY_OFFICER,COMPLIANCE_OFFICER,ADMIN
+
+        # ── 7. COMPLIANCE SERVICE ─────────────────────────────────────────
+        - id: compliance-route
+          uri: lb://COMPLIANCE-AUDIT-SERVICE
+          predicates:
+            - Path=/complianceRecord/**, /audit/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: COMPLIANCE_OFFICER,ADMIN
+
+        # ── 8. INSPECTION SERVICE ─────────────────────────────────────────
+        - id: inspection-route
+          uri: lb://INSPECTION-SERVICE
+          predicates:
+            - Path=/inspections/**, /compliance-checks/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: SAFETY_OFFICER,COMPLIANCE_OFFICER,ADMIN
+
+        # ── 9. NOTIFICATION SERVICE: Internal (no JWT, service-to-service) ─
+        - id: notification-internal-route
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/notifications/internal/**
+          filters:
+            - StripPrefix=0
+
+        # ── 10. NOTIFICATION SERVICE: Protected ──────────────────────────
+        - id: notification-route
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/notifications/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: ADMIN,EMPLOYEE,HAZARD_OFFICER,SAFETY_OFFICER,COMPLIANCE_OFFICER
+
+        # ── 11. PROGRAM-TRAINING SERVICE: Programs ───────────────────────
+        - id: program-route
+          uri: lb://PROGRAM-TRAINING-SERVICE
+          predicates:
+            - Path=/programs/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: ADMIN,SAFETY_OFFICER,EMPLOYEE,COMPLIANCE_OFFICER
+
+        # ── 12. PROGRAM-TRAINING SERVICE: Trainings ───────────────────────
+        - id: training-route
+          uri: lb://PROGRAM-TRAINING-SERVICE
+          predicates:
+            - Path=/trainings/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+              args:
+                allowedRoles: ADMIN,SAFETY_OFFICER,EMPLOYEE,COMPLIANCE_OFFICER
+
+jwt:
+  secret: Y2Y4ZTM1YmYtYjYyMC00ZDllLTlhZTMtZDY2ZDU4ZTMxZmE5Cg==
+  expiration: 86400000
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}:${random.value}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway, health, info

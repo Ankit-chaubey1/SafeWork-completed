@@ -1,0 +1,130 @@
+<div class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Audits</div>
+          <div class="page-subtitle">Plan and track compliance audits</div>
+        </div>
+        <button class="btn btn-primary" *ngIf="canAdd()" (click)="openForm()">+ New Audit</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="search-bar" style="margin:0;flex:1">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="form-control" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Search audits..." />
+            </div>
+            <select class="form-control" style="width:160px" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+              <option value="">All Status</option>
+              <option>Pending</option>
+              <option>Open</option>
+              <option>Closed</option>
+            </select>
+          </div>
+          <span class="text-muted text-sm">{{ filtered().length }} audits</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Title</th><th>Scope</th><th>Findings</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of filtered()">
+                <td class="fw-500">{{ a.auditTitle }}</td>
+                <td class="text-sm">{{ formatStatus(a.auditScope) }}</td>
+                <td style="max-width:240px" class="text-sm text-muted">{{ a.auditFinding ? (a.auditFinding | slice:0:70) + (a.auditFinding.length > 70 ? '...' : '') : '—' }}</td>
+                <td class="text-sm text-muted">{{ a.auditDate | date:'MMM d, y' }}</td>
+                <td><span [class]="statusBadge(a.auditStatus)">{{ formatStatus(a.auditStatus) }}</span></td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn btn-ghost btn-sm" (click)="selected.set(a)">View</button>
+                    <button *ngIf="canAdd()" class="btn btn-ghost btn-sm" (click)="editAudit(a)">Edit</button>
+                    <button *ngIf="canAdd()" class="btn btn-ghost btn-sm text-danger" (click)="deleteAudit(a.auditId)">Delete</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filtered().length === 0">
+                <td colspan="6"><div class="empty-state"><p>No audits found</p></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal-backdrop" *ngIf="showForm()" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingAuditId ? 'Edit' : 'New' }} Audit</h3>
+          <button class="btn btn-ghost btn-sm" (click)="closeForm()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Audit Title *</label>
+              <input class="form-control" [(ngModel)]="form.auditTitle" placeholder="e.g. Q1 Safety Audit 2026" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Scope *</label>
+              <select class="form-control" [(ngModel)]="form.auditScope">
+                <option value="FULL_SITE">Full Site</option>
+                <option value="SECTIONAL">Sectional</option>
+                <option value="INDIVIDUAL_STATION">Individual Station</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <input class="form-control" [(ngModel)]="form.auditDescription" placeholder="Quarterly workplace safety review" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input type="date" class="form-control" [(ngModel)]="form.auditDate" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-control" [(ngModel)]="form.auditStatus">
+                <option value="Pending">Pending</option>
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Findings</label>
+            <textarea class="form-control" [(ngModel)]="form.auditFinding" rows="3" placeholder="Record audit findings..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeForm()">Cancel</button>
+          <button class="btn btn-primary" (click)="save()">Save Audit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-backdrop" *ngIf="selected()" (click)="selected.set(null)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Audit Detail</h3>
+          <button class="btn btn-ghost btn-sm" (click)="selected.set(null)">✕</button>
+        </div>
+        <div class="modal-body" *ngIf="selected() as a">
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">ID</span><span>{{ a.auditId }}</span></div>
+            <div class="detail-item"><span class="detail-label">Status</span><span [class]="statusBadge(a.auditStatus)">{{ formatStatus(a.auditStatus) }}</span></div>
+            <div class="detail-item full"><span class="detail-label">Title</span><span>{{ a.auditTitle }}</span></div>
+            <div class="detail-item full"><span class="detail-label">Description</span><span>{{ a.auditDescription }}</span></div>
+            <div class="detail-item"><span class="detail-label">Scope</span><span>{{ formatStatus(a.auditScope) }}</span></div>
+            <div class="detail-item"><span class="detail-label">Date</span><span>{{ a.auditDate | date:'MMMM d, y' }}</span></div>
+            <div class="detail-item full"><span class="detail-label">Findings</span><span>{{ a.auditFinding || 'No findings recorded.' }}</span></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="selected.set(null)">Close</button>
+        </div>
+      </div>
+    </div>
+  

@@ -1,0 +1,18 @@
+package com.cts.hazard_incident_service.feignClient;
+
+import com.cts.hazard_incident_service.enums.NotificationCategory;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@FeignClient(name = "NOTIFICATION-SERVICE")
+public interface NotificationClient {
+
+    @PostMapping("/notifications/internal/create")
+    void createNotification(
+            @RequestParam Long userId,
+            @RequestParam Long entityId,
+            @RequestParam String message,
+            @RequestParam NotificationCategory category
+    );
+}
