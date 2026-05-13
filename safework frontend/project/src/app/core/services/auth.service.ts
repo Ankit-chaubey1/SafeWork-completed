@@ -3,15 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { firstValueFrom } from 'rxjs';
 import { User, UserRole } from '../models';
 
-const DEMO_USERS: User[] = [
-  { userId: 'u1', name: 'Alice Johnson', role: 'Employee', email: 'employee@safework.com', phone: '555-0101', status: 'Active', department: 'Manufacturing' },
-  { userId: 'u2', name: 'Bob Martinez', role: 'Safety Officer', email: 'officer@safework.com', phone: '555-0102', status: 'Active', department: 'Safety' },
-  { userId: 'u7', name: 'Hector Grant', role: 'Hazard Officer', email: 'hazard@safework.com', phone: '555-0107', status: 'Active', department: 'Safety' },
-  { userId: 'u3', name: 'Carol Davis', role: 'Manager', email: 'manager@safework.com', phone: '555-0103', status: 'Active', department: 'Operations' },
-  { userId: 'u4', name: 'David Kim', role: 'Administrator', email: 'admin@safework.com', phone: '555-0104', status: 'Active', department: 'IT' },
-  { userId: 'u5', name: 'Eva Torres', role: 'Compliance Officer', email: 'compliance@safework.com', phone: '555-0105', status: 'Active', department: 'Compliance' },
-  { userId: 'u6', name: 'Frank Wilson', role: 'Government Auditor', email: 'auditor@safework.com', phone: '555-0106', status: 'Active', department: 'Regulatory' },
-];
+
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -64,9 +56,7 @@ export class AuthService {
     }
   }
 
-  getDemoAccounts() {
-    return DEMO_USERS.map(u => ({ email: u.email, role: u.role, name: u.name }));
-  }
+
 
   getAuthHeaders(): HttpHeaders {
     const token = sessionStorage.getItem('sw_token');

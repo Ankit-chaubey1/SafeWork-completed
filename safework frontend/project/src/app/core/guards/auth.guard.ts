@@ -10,7 +10,7 @@ export const authGuard: CanActivateFn = () => {
   return router.createUrlTree(['/login']);
 };
 
-
+//this is for public pages like login register, if user is already logged in, it will redirect to dashboard
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
