@@ -1,104 +1,92 @@
-🚨 SafeWork
-SafeWork is a scalable Occupational Safety Management System built using Java Full Stack and Microservices Architecture. The platform helps organizations manage hazard reporting, safety compliance, training programs, and audit workflows efficiently. It includes secure role-based authentication, centralized API management, and communication between distributed microservices.
+# 🚨 SafeWork
 
-🔧 Technologies Used
-Frontend: Angular, TypeScript, HTML, CSS
+**SafeWork** is a scalable **Occupational Safety Management System** built using **Java Full Stack and Microservices Architecture**. The platform helps organizations manage **hazard reporting**, **safety compliance**, **training programs**, and **audit workflows** efficiently. It includes secure **role-based authentication**, centralized API management, and communication between distributed microservices.
 
-Backend: Java, Spring Boot, Microservices
+---
 
-Database: MySQL
+## 🔧 Technologies Used
 
-Architecture: REST APIs, API Gateway, Microservices
+* **Frontend**: Angular, TypeScript, HTML, CSS
+* **Backend**: Java, Spring Boot, Microservices
+* **Database**: MySQL
+* **Architecture**: REST APIs, API Gateway, Microservices
+* **Security**: Authentication & Authorization
+* **Dev Tools**: GitHub, Jira, Postman
+* **Concepts**: SOLID Principles, System Design, Design Patterns
 
-Security: Authentication & Authorization
+---
 
-Dev Tools: GitHub, Jira, Postman
+## 🚀 Core Features
 
-Concepts: SOLID Principles, System Design, Design Patterns
+### 🔐 Authentication & Authorization
 
-🚀 Core Features
-🔐 Authentication & Authorization
-Secure login system with role-based access
+* Secure login system with role-based access
+* Authentication and authorization for protected modules
+* Separate access levels for Employees, Hazard Officers, and Audit Officers
 
-Authentication and authorization for protected modules
+### ⚠️ Hazard Reporting System
 
-Separate access levels for Employees, Hazard Officers, and Audit Officers
+* Employees can report workplace hazards digitally
+* Real-time status tracking for reported incidents
+* Faster hazard resolution workflow management
 
-⚠️ Hazard Reporting System
-Employees can report workplace hazards digitally
+### 🏢 Microservices Architecture
 
-Real-time status tracking for reported incidents
+* Independent services for reporting, compliance, and training
+* Implemented API Gateway for centralized request handling
+* Used Circuit Breaker and Load Balancer concepts for scalable communication
 
-Faster hazard resolution workflow management
+### 📋 Compliance & Audit Management
 
-🏢 Microservices Architecture
-Independent services for reporting, compliance, and training
+* Managed safety compliance activities across the organization
+* Audit Officers can monitor reports and generate audit workflows
+* Maintained records for inspections and safety verification
 
-Implemented API Gateway for centralized request handling
+### 🎓 Safety Training Management
 
-Used Circuit Breaker and Load Balancer concepts for scalable communication
+* Created modules for employee safety training programs
+* Managed training schedules and participation tracking
+* Improved awareness of workplace safety standards
 
-📋 Compliance & Audit Management
-Managed safety compliance activities across the organization
+### 🔄 REST API Development
 
-Audit Officers can monitor reports and generate audit workflows
+* Developed RESTful APIs for communication between services
+* Implemented scalable backend modules using Spring Boot
+* Followed modular and maintainable coding practices
 
-Maintained records for inspections and safety verification
+### 👥 Team Collaboration
 
-🎓 Safety Training Management
-Created modules for employee safety training programs
+* Worked in Agile Scrum environment using Jira
+* Used GitHub for version control and team collaboration
+* Collaborated on backend service integration and workflow development
 
-Managed training schedules and participation tracking
+---
 
-Improved awareness of workplace safety standards
+## 🧭 Navigation
 
-🔄 REST API Development
-Developed RESTful APIs for communication between services
+* Employee Dashboard
+* Hazard Reporting Module
+* Compliance Management
+* Audit & Inspection Module
+* Training Management
+* Admin Control Panel
+* Role-Based Access Pages
 
-Implemented scalable backend modules using Spring Boot
+---
 
-Followed modular and maintainable coding practices
+## 📈 Project Highlights
 
-👥 Team Collaboration
-Worked in Agile Scrum environment using Jira
+* Improved workplace hazard reporting efficiency
+* Reduced manual safety management processes
+* Built scalable and maintainable backend architecture
+* Applied SOLID Principles and System Design concepts in real-world implementation
 
-Used GitHub for version control and team collaboration
+---
 
-Collaborated on backend service integration and workflow development
+## 📌 Future Enhancements
 
-🧭 Navigation
-Employee Dashboard
-
-Hazard Reporting Module
-
-Compliance Management
-
-Audit & Inspection Module
-
-Training Management
-
-Admin Control Panel
-
-Role-Based Access Pages
-
-📈 Project Highlights
-Improved workplace hazard reporting efficiency
-
-Reduced manual safety management processes
-
-Built scalable and maintainable backend architecture
-
-Applied SOLID Principles and System Design concepts in real-world implementation
-
-📌 Future Enhancements
-Email & SMS notifications
-
-Real-time analytics dashboard
-
-AI-based hazard prediction system
-
-
-
-Mobile application support
-
-Report export and analytics generation
+* Email & SMS notifications
+* Real-time analytics dashboard
+* AI-based hazard prediction system
+* Mobile application support
+* Report export and analytics generation
